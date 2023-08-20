@@ -1,4 +1,5 @@
 import sys
+import json
 import os.path
 from pathlib import Path
 
@@ -43,14 +44,29 @@ def parseArguments(system_arguments):
 
     return arguments
 
+def getAssetsFromTemplate(template_path):
+
+    template_file = open(template_path, "r")
+    template_string = template_file.read()
+
+    try: 
+        assets = json.loads(template_string)
+    except Exception as ex:
+        raise TypeError("Invalid Json!")
+
+    return assets
+
 def main():
 
     try:
+
         arguments = parseArguments(sys.argv)
-    except Exception as Ex: 
-        print("Something went wrong(1) ...\n"+ str(Ex))
+        assets = getAssetsFromTemplate(arguments['template_path'])
+
+    except Exception as ex:
+        print("Something went wrong ...\n"+ str(ex))
         sys.exit(0)
 
-    print(str(arguments))
+    print(str(assets))
 
 main()
