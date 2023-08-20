@@ -3,7 +3,11 @@ import json
 import os.path
 from pathlib import Path
 
-def parseArguments(system_arguments):
+SUPPORTED_COUNTRIES = ["united_states", "brazil"]
+REQUIRED_KEYS = ["ticker"]
+SUPPORTED_KEYS = ["ticker", "average_price"]
+
+def parseArguments(system_arguments) :
 
     if len(system_arguments) == 1 :
         raise TypeError("empty arguments!")
@@ -44,7 +48,31 @@ def parseArguments(system_arguments):
 
     return arguments
 
-def getAssetsFromTemplate(template_path):
+def validateTemplate(assets) :
+
+    for country, content in assets.items() :
+
+        if not country in SUPPORTED_COUNTRIES :
+            raise TypeError("Unsupported country! - " + country)
+
+        item = 1
+
+        for asset in content :
+
+            for required_key in REQUIRED_KEYS :
+                
+                if asset.get(required_key) is None:
+                    raise TypeError("Required key not found!\ncountry -> " + country + "\nitem -> " + str(item) + "\nrequired key missing -> " + required_key)
+
+
+            for key in asset :
+
+                if not key in SUPPORTED_KEYS :
+                    raise TypeError("Unsupported key!\ncountry -> " + country + "\nitem -> " + str(item) + "\nkey -> " + key)
+            
+            item += 1
+
+def getAssetsFromTemplate(template_path) :
 
     template_file = open(template_path, "r")
     template_string = template_file.read()
@@ -53,6 +81,9 @@ def getAssetsFromTemplate(template_path):
         assets = json.loads(template_string)
     except Exception as ex:
         raise TypeError("Invalid Json!")
+
+    validateTemplate(assets)
+    
 
     return assets
 
