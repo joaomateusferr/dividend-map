@@ -81,9 +81,40 @@ def getAssetsFromTemplate(template_path) :
 def getBrazilianAssetsInformationsFromBrApi(tickers_string) :
 
     request_url = BR_API_BASE_URL + "/quote/"+ tickers_string +'?range=1y&interval=1m&fundamental=false&dividends=true'
-    response = requests.get(request_url)
 
-    #print(response.json())
+    session = requests.session()
+    session.headers = {'Accept': 'application/json', 'Content-Type': 'application/json'}
+    response = session.get(request_url)
+
+    if response.status_code != 200 :
+        raise TypeError("Br api response code -> " + str(response.status_code))
+
+    result = response.json()
+
+    assets_informations = {}
+
+    for asset_info in result["results"] :
+
+        if not asset_info.get('error') is None:
+            print("There was an error getting information from " + asset_info["symbol"] + " ignoring it...")
+            continue
+
+        if not asset_info["dividendsData"]["cashDividends"] :
+            print("There is no dividend data for " + asset_info["symbol"] + " ignoring it...")
+            continue
+
+        year_dividends = 0
+
+        for cash_dividends in asset_info["dividendsData"]["cashDividends"] :
+            year_dividends += cash_dividends["rate"]
+
+
+        assets_informations[asset_info["symbol"]] = {
+            "market_price" : asset_info['regularMarketPrice'],
+            "dividends_per_share_by_year" : round(year_dividends, 3)
+        }
+
+    return assets_informations
 
 def getBrazilianAssetsInformations(brazilian_assets) :
 
@@ -94,6 +125,11 @@ def getBrazilianAssetsInformations(brazilian_assets) :
 
     brazilian_assets_informations = getBrazilianAssetsInformationsFromBrApi(tickers_string)
 
+    for ticker, asset_info in brazilian_assets_informations.items() :
+        brazilian_assets_informations[ticker] = brazilian_assets_informations[ticker] | brazilian_assets[ticker]
+        brazilian_assets_informations[ticker]["dividends_per_share_by_month"] = round(brazilian_assets_informations[ticker]["dividends_per_share_by_year"]/12, 3)
+
+    return brazilian_assets_informations
 
 def main():
 
