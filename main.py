@@ -1,11 +1,13 @@
 import sys
 import json
+import requests
 import os.path
 from pathlib import Path
 
 SUPPORTED_COUNTRIES = ["united_states", "brazil"]
-REQUIRED_KEYS = ["ticker"]
-SUPPORTED_KEYS = ["ticker", "average_price"]
+SUPPORTED_KEYS = ["average_price"]
+
+BR_API_BASE_URL = "https://brapi.dev/api"
 
 def parseArguments(system_arguments) :
 
@@ -55,37 +57,43 @@ def validateTemplate(assets) :
         if not country in SUPPORTED_COUNTRIES :
             raise TypeError("Unsupported country! - " + country)
 
-        item = 1
+        for ticker, asset_info in content.items() :
 
-        for asset in content :
-
-            for required_key in REQUIRED_KEYS :
-                
-                if asset.get(required_key) is None:
-                    raise TypeError("Required key not found!\ncountry -> " + country + "\nitem -> " + str(item) + "\nrequired key missing -> " + required_key)
-
-
-            for key in asset :
+            for key in asset_info :
 
                 if not key in SUPPORTED_KEYS :
-                    raise TypeError("Unsupported key!\ncountry -> " + country + "\nitem -> " + str(item) + "\nkey -> " + key)
-            
-            item += 1
+                    raise TypeError("Unsupported key!\ncountry -> " + country + "\nticker -> " + ticker + "\nkey -> " + key)
 
 def getAssetsFromTemplate(template_path) :
 
     template_file = open(template_path, "r")
     template_string = template_file.read()
 
-    try: 
+    try:
         assets = json.loads(template_string)
     except Exception as ex:
         raise TypeError("Invalid Json!")
 
     validateTemplate(assets)
-    
 
     return assets
+
+def getBrazilianAssetsInformationsFromBrApi(tickers_string) :
+
+    request_url = BR_API_BASE_URL + "/quote/"+ tickers_string +'?range=1y&interval=1m&fundamental=false&dividends=true'
+    response = requests.get(request_url)
+
+    #print(response.json())
+
+def getBrazilianAssetsInformations(brazilian_assets) :
+
+    tickers = list(brazilian_assets.keys())
+
+    delimiter = "%2C"
+    tickers_string = delimiter.join(map(str, tickers))
+
+    brazilian_assets_informations = getBrazilianAssetsInformationsFromBrApi(tickers_string)
+
 
 def main():
 
@@ -95,9 +103,17 @@ def main():
         assets = getAssetsFromTemplate(arguments['template_path'])
 
     except Exception as ex:
-        print("Something went wrong ...\n"+ str(ex))
+
+        print("Something went wrong (1) ...\n"+ str(ex))
         sys.exit(0)
 
-    print(str(assets))
+    try:
+
+        brazilian_assets_informations = getBrazilianAssetsInformations(assets["brazil"])
+
+    except Exception as ex:
+
+        print("Something went wrong (2) ...\n"+ str(ex))
+        sys.exit(0)
 
 main()
