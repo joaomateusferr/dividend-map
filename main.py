@@ -3,6 +3,7 @@ import json
 import requests
 import os.path
 from pathlib import Path
+import yfinance as yf
 
 SUPPORTED_COUNTRIES = ["united_states", "brazil"]
 SUPPORTED_KEYS = ["average_price"]
@@ -57,7 +58,7 @@ def validateTemplate(assets) :
         if not country in SUPPORTED_COUNTRIES :
             raise TypeError("Unsupported country! - " + country)
 
-        for ticker, asset_info in content.items() :
+        for ticker, asset_info in content['asset_information'].items() :
 
             for key in asset_info :
 
@@ -131,6 +132,31 @@ def getBrazilianAssetsInformations(brazilian_assets) :
 
     return brazilian_assets_informations
 
+def getAssetsAdditionalInformation(assets) :
+
+    tickers = list(assets.keys())
+
+    delimiter = " "
+    tickers_string = delimiter.join(map(str, tickers))
+    stocks = yf.Tickers(tickers_string)
+
+    for ticker, asset_info in assets.items() :
+
+        assets[ticker]['market_price'] = round(stocks.tickers[ticker].fast_info['lastPrice'], 3)
+        assets[ticker]['payment_dates']  = []
+        assets[ticker]['average_annual_dividend_per_share'] = 0
+
+        for date, value in stocks.tickers[ticker].dividends.items() :
+
+            assets[ticker]['payment_dates'].append(date)
+            assets[ticker]['average_annual_dividend_per_share'] += value
+
+        assets[ticker]['average_annual_dividend_per_share'] = round(assets[ticker]['average_annual_dividend_per_share'], 3)
+        assets[ticker]['average_monthly_dividend_per_share'] = round(assets[ticker]['average_annual_dividend_per_share']/12, 3)
+
+
+    return assets
+
 def main():
 
     try:
@@ -145,6 +171,8 @@ def main():
 
     try:
 
+        american_assets = getAssetsAdditionalInformation(assets["united_states"]['asset_information'])
+        print(american_assets)
         brazilian_assets_informations = getBrazilianAssetsInformations(assets["brazil"])
 
     except Exception as ex:
