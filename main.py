@@ -173,7 +173,8 @@ def main():
 
         american_assets = getAssetsAdditionalInformation(assets["united_states"]['asset_information'])
         print(american_assets)
-        brazilian_assets_informations = getBrazilianAssetsInformations(assets["brazil"])
+        brazilian_assets = getAssetsAdditionalInformation(assets["brazil"]['asset_information'])
+        print(brazilian_assets)
 
     except Exception as ex:
 
