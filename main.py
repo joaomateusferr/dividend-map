@@ -8,8 +8,6 @@ import yfinance as yf
 SUPPORTED_COUNTRIES = ["united_states", "brazil"]
 SUPPORTED_KEYS = ["average_price"]
 
-BR_API_BASE_URL = "https://brapi.dev/api"
-
 def parseArguments(system_arguments) :
 
     if len(system_arguments) == 1 :
