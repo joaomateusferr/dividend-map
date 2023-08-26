@@ -1,0 +1,44 @@
+{
+    "brazil": {
+
+        "asset_information": {
+
+            "HGLG11.SA": {
+                "average_price": 159.59
+            },
+
+            "KNRI11.SA": {
+                "average_price": 148.20
+            }
+
+        },
+
+        "currency": {
+            "name": "real",
+            "symbol": "R$"
+        }
+
+    },
+
+    "united_states": {
+
+        "asset_information": {
+
+            "IVV": {
+                "average_price": 426.88
+            },
+
+            "NOBL": {},
+
+            "AAPL": {},
+
+            "AMZN": {}
+        },
+
+        "currency": {
+            "name": "dollar",
+            "symbol": "$"
+        }
+
+    }
+}
