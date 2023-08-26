@@ -6,7 +6,6 @@ from pathlib import Path
 import yfinance as yf
 
 SUPPORTED_COUNTRIES = ["united_states", "brazil"]
-SUPPORTED_KEYS = ["average_price"]
 
 def parseArguments(system_arguments) :
 
@@ -56,14 +55,28 @@ def validateTemplate(assets) :
         if not country in SUPPORTED_COUNTRIES :
             raise TypeError("Unsupported country! - " + country)
 
-        #add checks on required fields (currencies) here
+        for required_country_key in ["asset_information", 'currency'] :
+
+            if content.get(required_country_key) is None:
+                raise TypeError("Required key not found!\ncountry -> " + country + "\nrequired key missing -> " + required_country_key)
+
 
         for ticker, asset_info in content['asset_information'].items() :
 
             for key in asset_info :
 
-                if not key in SUPPORTED_KEYS :
+                if not key in ["average_price"] :   #supported asset info keys
                     raise TypeError("Unsupported key!\ncountry -> " + country + "\nticker -> " + ticker + "\nkey -> " + key)
+
+        for currency_key in content['currency'] :
+
+            if not currency_key in ["name", "symbol"] :  #supported currency info keys
+                raise TypeError("Unsupported key!\ncountry -> " + country + "\ncurrency\nkey -> " + currency_key)
+
+        for required_currency_key in ["name", "symbol"] :
+
+            if content['currency'].get(required_currency_key) is None:
+                raise TypeError("Required key not found!\ncountry -> " + country + "\nrequired currency key missing -> " + required_currency_key)
 
 def getAssetsFromTemplate(template_path) :
 
