@@ -4,6 +4,7 @@ import requests
 import os.path
 from pathlib import Path
 import yfinance as yf
+from pprint import pprint#debug only
 
 def parseArguments(system_arguments) :
 
@@ -102,18 +103,81 @@ def getAssetsAdditionalInformation(assets) :
 
         assets[ticker]['market_price'] = round(stocks.tickers[ticker].fast_info['lastPrice'], 3)
         assets[ticker]['payment_dates']  = []
-        assets[ticker]['average_annual_dividend_per_share'] = 0
+        assets[ticker]['average_annual_dividend'] = 0
 
         for date, value in stocks.tickers[ticker].dividends.items() :
-
             assets[ticker]['payment_dates'].append(date)
-            assets[ticker]['average_annual_dividend_per_share'] += value
+            assets[ticker]['average_annual_dividend'] += value
 
-        assets[ticker]['average_annual_dividend_per_share'] = round(assets[ticker]['average_annual_dividend_per_share'], 3)
-        assets[ticker]['average_monthly_dividend_per_share'] = round(assets[ticker]['average_annual_dividend_per_share']/12, 3)
+        if assets[ticker]['average_annual_dividend'] == 0 :
+            continue
+
+        assets[ticker]['average_annual_dividend'] = round(assets[ticker]['average_annual_dividend'], 3)
+        assets[ticker]['average_monthly_dividend'] = round(assets[ticker]['average_annual_dividend']/12, 3)
 
 
     return assets
+
+def calculateExtraInformation(assets) :
+
+    for ticker, asset_info in assets.items() :
+
+        if not asset_info.get('average_price') is None :
+
+            assets[ticker]['return'] = round(assets[ticker]['market_price'] - assets[ticker]['average_price'], 3)
+            assets[ticker]['return_percentage'] = round((assets[ticker]['return']/assets[ticker]['average_price'])*100, 3)
+
+            if assets[ticker]['return'] < 0 :
+                    assets[ticker]['return_percentage'] = assets[ticker]['return_percentage']*-1
+
+            if assets[ticker]['average_monthly_dividend'] > 0.0001:
+
+                #considers the share gains or losses and dividends
+
+                if assets[ticker]['average_price'] + assets[ticker]['return']*-1 < 0 :
+                    assets[ticker]['payback_period_in_months'] = 0
+                else :
+                    assets[ticker]['payback_period_in_months'] = round((assets[ticker]['average_price'] + assets[ticker]['return']*-1) / assets[ticker]['average_monthly_dividend'], 3)
+
+                if assets[ticker]['payback_period_in_months'] > 0 :
+                    assets[ticker]['payback_period_in_years'] = round(assets[ticker]['payback_period_in_months']/12, 3)
+                else :
+                    assets[ticker]['payback_period_in_years'] = 0
+
+                #considers dividends only
+
+                assets[ticker]['dividend_only_payback_period_in_months'] = round(assets[ticker]['average_price'] / assets[ticker]['average_monthly_dividend'], 3)
+
+                if assets[ticker]['dividend_only_payback_period_in_months'] > 0 :
+                    assets[ticker]['dividend_only_payback_period_in_years'] = round(assets[ticker]['dividend_only_payback_period_in_months']/12 ,3)
+                else :
+                    assets[ticker]['dividend_only_payback_period_in_years'] = 0
+
+        dividend_frequency = len(assets[ticker]['payment_dates'])
+
+        if dividend_frequency == 0 :
+            continue
+
+        if dividend_frequency == 52 :
+            assets[ticker]['dividend_frequency'] = 'Weekly'
+        elif dividend_frequency == 26 :
+            assets[ticker]['dividend_frequency'] = 'Biweekly'
+        elif dividend_frequency == 12 :
+            assets[ticker]['dividend_frequency'] = 'Monthly'
+        elif dividend_frequency == 6 :
+            assets[ticker]['dividend_frequency'] = 'Bimonthly'
+        elif dividend_frequency == 4 :
+            assets[ticker]['dividend_frequency'] = 'Quarterly'
+        elif dividend_frequency == 3 :
+            assets[ticker]['dividend_frequency'] = 'Trimesterly'
+        elif dividend_frequency == 2 :
+            assets[ticker]['dividend_frequency'] = 'Semiannually'
+        elif dividend_frequency == 1 :
+            assets[ticker]['dividend_frequency'] = 'Annually'
+
+
+    pprint(assets)
+
 
 def main():
 
@@ -130,13 +194,21 @@ def main():
     try:
 
         american_assets = getAssetsAdditionalInformation(assets["united_states"]['asset_information'])
-        print(american_assets)
         brazilian_assets = getAssetsAdditionalInformation(assets["brazil"]['asset_information'])
-        print(brazilian_assets)
 
     except Exception as ex:
 
         print("Something went wrong (2) ...\n"+ str(ex))
+        sys.exit(0)
+
+    try:
+
+        american_assets = calculateExtraInformation(assets["united_states"]['asset_information'])
+        brazilian_assets = calculateExtraInformation(assets["brazil"]['asset_information'])
+
+    except Exception as ex:
+
+        print("Something went wrong (3) ...\n"+ str(ex))
         sys.exit(0)
 
 main()
