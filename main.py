@@ -1,6 +1,7 @@
 import sys
 import json
 import requests
+import math
 import os.path
 from pathlib import Path
 import yfinance as yf
@@ -139,7 +140,11 @@ def calculateExtraInformation(assets) :
 
             if assets[ticker]['average_monthly_dividend'] > 0.0001:
 
-                #considers the share gains or losses and dividends
+                #magic number
+
+                assets[ticker]['magic_number'] = math.ceil(assets[ticker]['market_price']/assets[ticker]['average_monthly_dividend'])
+
+                #payback period considers the share gains or losses and dividends
 
                 if assets[ticker]['average_price'] + assets[ticker]['return']*-1 < 0 :
                     assets[ticker]['payback_period_in_months'] = 0
@@ -151,7 +156,7 @@ def calculateExtraInformation(assets) :
                 else :
                     assets[ticker]['payback_period_in_years'] = 0
 
-                #considers dividends only
+                #dividend only payback period considers dividends only
 
                 assets[ticker]['dividend_only_payback_period_in_months'] = round(assets[ticker]['average_price'] / assets[ticker]['average_monthly_dividend'], 3)
 
@@ -183,7 +188,7 @@ def calculateExtraInformation(assets) :
             assets[ticker]['dividend_frequency'] = 'Annually'
 
 
-    pprint(assets)
+    return assets
 
 
 def main():
