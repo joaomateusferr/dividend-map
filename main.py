@@ -200,27 +200,29 @@ def main():
 
     except Exception as ex:
 
-        print("Something went wrong (1) ...\n"+ str(ex))
+        print("Something went wrong when trying to get template information ...\n"+ str(ex))
         sys.exit(0)
 
     try:
 
-        american_assets = getAssetsAdditionalInformation(assets["united_states"]['asset_information'])
-        brazilian_assets = getAssetsAdditionalInformation(assets["brazil"]['asset_information'])
+        for country, content in assets.items() :
+            assets[country]['asset_information'] = getAssetsAdditionalInformation(content['asset_information'])
 
     except Exception as ex:
 
-        print("Something went wrong (2) ...\n"+ str(ex))
+        print("Something went wrong when trying to get asset information from the yahoo finance api ...\n"+ str(ex))
         sys.exit(0)
 
     try:
 
-        american_assets = calculateExtraInformation(assets["united_states"]['asset_information'])
-        brazilian_assets = calculateExtraInformation(assets["brazil"]['asset_information'])
+        for country, content in assets.items() :
+            assets[country]['asset_information']  = calculateExtraInformation(content['asset_information'])
 
     except Exception as ex:
 
-        print("Something went wrong (3) ...\n"+ str(ex))
+        print("Something went wrong when trying to calculate extra information about assets ...\n"+ str(ex))
         sys.exit(0)
+
+    pprint(assets)
 
 main()
