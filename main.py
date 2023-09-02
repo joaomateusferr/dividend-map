@@ -9,6 +9,14 @@ import pandas as pd
 from datetime import datetime
 from pprint import pprint#debug only
 
+REQUIRED_COUNTRY_KEY = ['asset_information', 'currency']
+REQUIRED_CURRENCY_KEYS = ['name', 'symbol']
+
+SUPPORTED_COUNTRIES = ['united_states', 'brazil']
+SUPPORTED_ASSET_INFO_KEYS = ['average_price']
+SUPPORTED_CURRENCY_KEYS = ['name', 'symbol']
+SUPPORTED_EXPORT_ASSET_COLUMNS = ['market_price', 'average_price', 'return', 'return_percentage', 'average_annual_dividend', 'average_monthly_dividend', 'magic_number', 'payback_period_in_months', 'dividend_only_payback_period_in_months', 'payback_period_in_years', 'dividend_only_payback_period_in_years']
+
 def parseArguments(system_arguments) :
 
     if len(system_arguments) == 1 :
@@ -54,10 +62,10 @@ def validateTemplate(assets) :
 
     for country, content in assets.items() :
 
-        if not country in ["united_states", "brazil"] : #supported countries
+        if not country in SUPPORTED_COUNTRIES:
             raise TypeError("Unsupported country! - " + country)
 
-        for required_country_key in ["asset_information", 'currency'] :
+        for required_country_key in REQUIRED_COUNTRY_KEY :
 
             if content.get(required_country_key) is None:
                 raise TypeError("Required key not found!\ncountry -> " + country + "\nrequired key missing -> " + required_country_key)
@@ -67,17 +75,17 @@ def validateTemplate(assets) :
 
             for key in asset_info :
 
-                if not key in ["average_price"] :   #supported asset info keys
+                if not key in SUPPORTED_ASSET_INFO_KEYS :
                     raise TypeError("Unsupported key!\ncountry -> " + country + "\nticker -> " + ticker + "\nkey -> " + key)
 
-        for required_currency_key in ["name", "symbol"] :
+        for required_currency_key in REQUIRED_CURRENCY_KEYS:
 
             if content['currency'].get(required_currency_key) is None:
                 raise TypeError("Required key not found!\ncountry -> " + country + "\nrequired currency key missing -> " + required_currency_key)
 
         for currency_key in content['currency'] :
 
-            if not currency_key in ["name", "symbol"] :  #supported currency info keys
+            if not currency_key in SUPPORTED_CURRENCY_KEYS:
                 raise TypeError("Unsupported key!\ncountry -> " + country + "\ncurrency\nkey -> " + currency_key)
 
 def getAssetsFromTemplate(template_path) :
@@ -190,6 +198,11 @@ def calculateExtraInformation(assets) :
 
     return assets
 
+def formatCSVData(assets) :
+
+    pprint(assets)
+    return
+
 
 def main():
 
@@ -223,6 +236,18 @@ def main():
         print("Something went wrong when trying to calculate extra information about assets ...\n"+ str(ex))
         sys.exit(0)
 
-    pprint(assets)
+    csv_data = {}
+
+    try:
+
+        for country, content in assets.items() :
+            csv_data[country] = {}
+            csv_data[country] = formatCSVData(content['asset_information'])
+
+    except Exception as ex:
+
+        print("Something went wrong () ...\n"+ str(ex))
+        sys.exit(0)
+
 
 main()
