@@ -16,7 +16,12 @@
         "currency": {
             "name": "real",
             "symbol": "R$"
-        }
+        },
+
+        "export_asset_columns": [
+            "ticker",
+            "return_percentage"
+        ]
 
     },
 
@@ -38,7 +43,12 @@
         "currency": {
             "name": "dollar",
             "symbol": "$"
-        }
+        },
+
+        "export_asset_columns": [
+            "ticker",
+            "market_price"
+        ]
 
     }
 }
