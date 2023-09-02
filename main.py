@@ -11,11 +11,12 @@ from pprint import pprint#debug only
 
 REQUIRED_COUNTRY_KEY = ['asset_information', 'currency']
 REQUIRED_CURRENCY_KEYS = ['name', 'symbol']
+REQUIRED_EXPORT_ASSET_COLUMNS = ['ticker']
 
 SUPPORTED_COUNTRIES = ['united_states', 'brazil']
 SUPPORTED_ASSET_INFO_KEYS = ['average_price']
 SUPPORTED_CURRENCY_KEYS = ['name', 'symbol']
-SUPPORTED_EXPORT_ASSET_COLUMNS = ['market_price', 'average_price', 'return', 'return_percentage', 'average_annual_dividend', 'average_monthly_dividend', 'magic_number', 'payback_period_in_months', 'dividend_only_payback_period_in_months', 'payback_period_in_years', 'dividend_only_payback_period_in_years']
+SUPPORTED_EXPORT_ASSET_COLUMNS = ['ticker', 'market_price', 'average_price', 'return', 'return_percentage', 'average_annual_dividend', 'average_monthly_dividend', 'magic_number', 'payback_period_in_months', 'dividend_only_payback_period_in_months', 'payback_period_in_years', 'dividend_only_payback_period_in_years']
 
 def parseArguments(system_arguments) :
 
@@ -87,6 +88,22 @@ def validateTemplate(assets) :
 
             if not currency_key in SUPPORTED_CURRENCY_KEYS:
                 raise TypeError("Unsupported key!\ncountry -> " + country + "\ncurrency\nkey -> " + currency_key)
+
+        missing_required_export_asset_column = None
+
+        for required_export_asset_column in REQUIRED_EXPORT_ASSET_COLUMNS:
+
+            if required_export_asset_column not in content['export_asset_columns']:
+                missing_required_export_asset_column = required_export_asset_column
+                break
+
+        if not missing_required_export_asset_column is None :
+            raise TypeError("Required key not found!\ncountry -> " + country + "\nrequired export asset column missing -> " + missing_required_export_asset_column)
+
+        for export_asset_column in content['export_asset_columns'] :
+
+            if not export_asset_column in SUPPORTED_EXPORT_ASSET_COLUMNS:
+                raise TypeError("Unsupported key!\ncountry -> " + country + "\nexport asset column\nkey -> " + export_asset_column)
 
 def getAssetsFromTemplate(template_path) :
 
