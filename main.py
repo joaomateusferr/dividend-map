@@ -4,6 +4,8 @@ import requests
 import os.path
 from pathlib import Path
 import yfinance as yf
+import pandas as pd
+from datetime import datetime
 from pprint import pprint#debug only
 
 def parseArguments(system_arguments) :
@@ -105,8 +107,13 @@ def getAssetsAdditionalInformation(assets) :
         assets[ticker]['payment_dates']  = []
         assets[ticker]['average_annual_dividend'] = 0
 
-        for date, value in stocks.tickers[ticker].dividends.items() :
-            assets[ticker]['payment_dates'].append(date)
+        for dividend_date, value in stocks.tickers[ticker].dividends.items() :
+
+            one_year_ago = datetime.now() - pd.DateOffset(years=1)
+
+            if dividend_date.timestamp() > one_year_ago.timestamp() :
+                assets[ticker]['payment_dates'].append(dividend_date)
+
             assets[ticker]['average_annual_dividend'] += value
 
         if assets[ticker]['average_annual_dividend'] == 0 :
