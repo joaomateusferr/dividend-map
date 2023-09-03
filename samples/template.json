@@ -1,0 +1,57 @@
+{
+    "brazil": {
+
+        "asset_information": {
+
+            "HGLG11.SA": {
+                "dividend_frequency" : "monthly",
+                "average_price": 159.59
+            },
+
+            "KNRI11.SA": {
+                "dividend_frequency" : "monthly",
+                "average_price": 148.20
+            }
+
+        },
+
+        "currency": {
+            "name": "real",
+            "symbol": "R$"
+        },
+
+        "export_asset_columns": [
+            "ticker",
+            "return_percentage"
+        ]
+
+    },
+
+    "united_states": {
+
+        "asset_information": {
+
+            "IVV": {
+                "dividend_frequency" : "quarterly",
+                "average_price": 426.88
+            },
+
+            "NOBL": {},
+
+            "AAPL": {},
+
+            "AMZN": {}
+        },
+
+        "currency": {
+            "name": "dollar",
+            "symbol": "$"
+        },
+
+        "export_asset_columns": [
+            "ticker",
+            "market_price"
+        ]
+
+    }
+}
