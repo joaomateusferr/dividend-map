@@ -2,6 +2,7 @@ import sys
 import json
 import requests
 import math
+import csv
 import os.path
 from pathlib import Path
 import yfinance as yf
@@ -135,7 +136,7 @@ def getAssetsAdditionalInformation(assets) :
 
         for dividend_date, value in stocks.tickers[ticker].dividends.items() :
 
-            one_year_ago = datetime.now() - pd.DateOffset(years=1)
+            one_year_ago = datetime.now() - pd.DateOffset(years=1) #fix it ()
 
             if dividend_date.timestamp() > one_year_ago.timestamp() :
                 assets[ticker]['payment_dates'].append(dividend_date)
@@ -163,7 +164,7 @@ def calculateExtraInformation(assets) :
             if assets[ticker]['return'] < 0 :
                     assets[ticker]['return_percentage'] = assets[ticker]['return_percentage']*-1
 
-            if assets[ticker]['average_monthly_dividend'] > 0.0001:
+            if not asset_info.get('average_monthly_dividend') is None and assets[ticker]['average_monthly_dividend'] > 0.0001:
 
                 #magic number
 
@@ -239,6 +240,16 @@ def formatCSVData(export_asset_columns, assets) :
 
     return csv_data
 
+def createCSV(export_path, csv_data) :
+
+    for country, data in csv_data.items() :
+
+        with open(export_path + '/' +country+'.csv', mode='w', newline='') as file:
+
+            writer = csv.writer(file)
+
+            for row in data:
+                writer.writerow(row)
 
 def main():
 
@@ -283,6 +294,15 @@ def main():
     except Exception as ex:
 
         print("Something went wrong when formatting the csv ...\n"+ str(ex))
+        sys.exit(0)
+
+    try:
+
+        createCSV(arguments['export_path'], csv_data)
+
+    except Exception as ex:
+
+        print("Something went wrong when creating the csv ...\n"+ str(ex))
         sys.exit(0)
 
 
