@@ -16,7 +16,7 @@ REQUIRED_EXPORT_ASSET_COLUMNS = ['ticker']
 SUPPORTED_COUNTRIES = ['united_states', 'brazil']
 SUPPORTED_ASSET_INFO_KEYS = ['average_price']
 SUPPORTED_CURRENCY_KEYS = ['name', 'symbol']
-SUPPORTED_EXPORT_ASSET_COLUMNS = ['ticker', 'market_price', 'average_price', 'return', 'return_percentage', 'average_annual_dividend', 'average_monthly_dividend', 'magic_number', 'payback_period_in_months', 'dividend_only_payback_period_in_months', 'payback_period_in_years', 'dividend_only_payback_period_in_years']
+SUPPORTED_EXPORT_ASSET_COLUMNS = ['ticker', 'market_price', 'average_price', 'return', 'return_percentage', 'dividend_frequency', 'average_annual_dividend', 'average_monthly_dividend', 'magic_number', 'payback_period_in_months', 'dividend_only_payback_period_in_months', 'payback_period_in_years', 'dividend_only_payback_period_in_years']
 
 def parseArguments(system_arguments) :
 
@@ -215,10 +215,29 @@ def calculateExtraInformation(assets) :
 
     return assets
 
-def formatCSVData(assets) :
+def formatCSVData(export_asset_columns, assets) :
 
-    pprint(assets)
-    return
+    csv_data = []
+    csv_data.append(export_asset_columns)
+
+    for ticker, asset_info in assets.items() :
+
+        row = []
+
+        for export_asset_column in export_asset_columns:
+
+            if export_asset_column == 'ticker' :
+                row.append(ticker)
+                continue
+
+            if not asset_info.get(export_asset_column) is None:
+                row.append(asset_info.get(export_asset_column))
+            else :
+                row.append('-')
+
+        csv_data.append(row)
+
+    return csv_data
 
 
 def main():
@@ -259,11 +278,11 @@ def main():
 
         for country, content in assets.items() :
             csv_data[country] = {}
-            csv_data[country] = formatCSVData(content['asset_information'])
+            csv_data[country] = formatCSVData(content['export_asset_columns'], content['asset_information'])
 
     except Exception as ex:
 
-        print("Something went wrong () ...\n"+ str(ex))
+        print("Something went wrong when formatting the csv ...\n"+ str(ex))
         sys.exit(0)
 
 
