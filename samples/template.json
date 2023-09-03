@@ -4,10 +4,12 @@
         "asset_information": {
 
             "HGLG11.SA": {
+                "dividend_frequency" : "monthly",
                 "average_price": 159.59
             },
 
             "KNRI11.SA": {
+                "dividend_frequency" : "monthly",
                 "average_price": 148.20
             }
 
@@ -30,6 +32,7 @@
         "asset_information": {
 
             "IVV": {
+                "dividend_frequency" : "quarterly",
                 "average_price": 426.88
             },
 
