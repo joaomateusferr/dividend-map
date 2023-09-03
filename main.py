@@ -17,7 +17,7 @@ REQUIRED_EXPORT_ASSET_COLUMNS = ['ticker']
 SUPPORTED_COUNTRIES = ['united_states', 'brazil']
 SUPPORTED_ASSET_INFO_KEYS = ['average_price', 'dividend_frequency']
 SUPPORTED_CURRENCY_KEYS = ['name', 'symbol']
-SUPPORTED_EXPORT_ASSET_COLUMNS = ['ticker', 'market_price', 'average_price', 'return', 'return_percentage', 'dividend_frequency', 'average_annual_dividend', 'average_monthly_dividend', 'magic_number', 'payback_period_in_months', 'dividend_only_payback_period_in_months', 'payback_period_in_years', 'dividend_only_payback_period_in_years']
+SUPPORTED_EXPORT_ASSET_COLUMNS = ['ticker', 'market_price', 'average_price', 'return', 'return_percentage', 'dividend_frequency', 'payment_months', 'average_annual_dividend', 'average_monthly_dividend', 'magic_number', 'payback_period_in_months', 'dividend_only_payback_period_in_months', 'payback_period_in_years', 'dividend_only_payback_period_in_years']
 
 def parseArguments(system_arguments) :
 
@@ -132,6 +132,7 @@ def getAssetsAdditionalInformation(assets) :
 
         assets[ticker]['market_price'] = round(stocks.tickers[ticker].fast_info['lastPrice'], 3)
         assets[ticker]['payment_dates']  = []
+        assets[ticker]['payment_months'] = []
         assets[ticker]['average_annual_dividend'] = 0
 
         for dividend_date, value in stocks.tickers[ticker].dividends.items() :
@@ -140,8 +141,8 @@ def getAssetsAdditionalInformation(assets) :
 
             if dividend_date.timestamp() > one_year_ago.timestamp() :
                 assets[ticker]['payment_dates'].append(dividend_date)
-
-            assets[ticker]['average_annual_dividend'] += value
+                assets[ticker]['payment_months'].append(dividend_date.to_pydatetime().month)
+                assets[ticker]['average_annual_dividend'] += value
 
         if assets[ticker]['average_annual_dividend'] == 0 :
             continue
@@ -233,7 +234,15 @@ def formatCSVData(export_asset_columns, assets) :
                 continue
 
             if not asset_info.get(export_asset_column) is None:
-                row.append(asset_info.get(export_asset_column))
+
+                if export_asset_column == 'payment_months' :
+
+                    delimiter = ", "
+                    row.append(delimiter.join(map(str, asset_info['payment_months'])))
+
+                else :
+                    row.append(asset_info.get(export_asset_column))
+
             else :
                 row.append('-')
 
