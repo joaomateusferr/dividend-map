@@ -8,7 +8,7 @@ from pathlib import Path
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
-from pprint import pprint   #debug only
+#from pprint import pprint   #debug only
 
 REQUIRED_COUNTRY_KEY = ['asset_information', 'export_asset_columns', 'currency']
 REQUIRED_CURRENCY_KEYS = ['name', 'symbol']
