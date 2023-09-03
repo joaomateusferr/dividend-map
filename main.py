@@ -8,14 +8,14 @@ from pathlib import Path
 import yfinance as yf
 import pandas as pd
 from datetime import datetime
-from pprint import pprint#debug only
+from pprint import pprint   #debug only
 
-REQUIRED_COUNTRY_KEY = ['asset_information', 'currency']
+REQUIRED_COUNTRY_KEY = ['asset_information', 'export_asset_columns', 'currency']
 REQUIRED_CURRENCY_KEYS = ['name', 'symbol']
 REQUIRED_EXPORT_ASSET_COLUMNS = ['ticker']
 
 SUPPORTED_COUNTRIES = ['united_states', 'brazil']
-SUPPORTED_ASSET_INFO_KEYS = ['average_price']
+SUPPORTED_ASSET_INFO_KEYS = ['average_price', 'dividend_frequency']
 SUPPORTED_CURRENCY_KEYS = ['name', 'symbol']
 SUPPORTED_EXPORT_ASSET_COLUMNS = ['ticker', 'market_price', 'average_price', 'return', 'return_percentage', 'dividend_frequency', 'average_annual_dividend', 'average_monthly_dividend', 'magic_number', 'payback_period_in_months', 'dividend_only_payback_period_in_months', 'payback_period_in_years', 'dividend_only_payback_period_in_years']
 
@@ -136,7 +136,7 @@ def getAssetsAdditionalInformation(assets) :
 
         for dividend_date, value in stocks.tickers[ticker].dividends.items() :
 
-            one_year_ago = datetime.now() - pd.DateOffset(years=1) #fix it (depending on the day of the month it shows one less payment date - 11 on an asset that has monthly payments - ALZR11.SA as example)
+            one_year_ago = datetime.now() - pd.DateOffset(years=1)
 
             if dividend_date.timestamp() > one_year_ago.timestamp() :
                 assets[ticker]['payment_dates'].append(dividend_date)
@@ -193,22 +193,26 @@ def calculateExtraInformation(assets) :
         if dividend_frequency == 0 :
             continue
 
+        #not all assets have regular dividend payments if the dividend_frequency exists in asset form the template use it otherwise, try to calculate it manually
+        if not asset_info.get('dividend_frequency') is None :
+            continue
+
         if dividend_frequency == 52 :
-            assets[ticker]['dividend_frequency'] = 'Weekly'
+            assets[ticker]['dividend_frequency'] = 'weekly'
         elif dividend_frequency == 26 :
-            assets[ticker]['dividend_frequency'] = 'Biweekly'
+            assets[ticker]['dividend_frequency'] = 'biweekly'
         elif dividend_frequency == 12 :
-            assets[ticker]['dividend_frequency'] = 'Monthly'
+            assets[ticker]['dividend_frequency'] = 'monthly'
         elif dividend_frequency == 6 :
-            assets[ticker]['dividend_frequency'] = 'Bimonthly'
+            assets[ticker]['dividend_frequency'] = 'bimonthly'
         elif dividend_frequency == 4 :
-            assets[ticker]['dividend_frequency'] = 'Quarterly'
+            assets[ticker]['dividend_frequency'] = 'quarterly'
         elif dividend_frequency == 3 :
-            assets[ticker]['dividend_frequency'] = 'Trimesterly'
+            assets[ticker]['dividend_frequency'] = 'trimesterly'
         elif dividend_frequency == 2 :
-            assets[ticker]['dividend_frequency'] = 'Semiannually'
+            assets[ticker]['dividend_frequency'] = 'semiannually'
         elif dividend_frequency == 1 :
-            assets[ticker]['dividend_frequency'] = 'Annually'
+            assets[ticker]['dividend_frequency'] = 'annually'
 
 
     return assets
