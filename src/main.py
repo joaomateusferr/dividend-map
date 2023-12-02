@@ -207,9 +207,9 @@ def calculateExtraInformation(assets) :
         elif dividend_frequency == 6 :
             assets[ticker]['dividend_frequency'] = 'bimonthly'
         elif dividend_frequency == 4 :
-            assets[ticker]['dividend_frequency'] = 'quarterly'
-        elif dividend_frequency == 3 :
             assets[ticker]['dividend_frequency'] = 'trimesterly'
+        elif dividend_frequency == 3 :
+            assets[ticker]['dividend_frequency'] = 'quarterly'
         elif dividend_frequency == 2 :
             assets[ticker]['dividend_frequency'] = 'semiannually'
         elif dividend_frequency == 1 :
